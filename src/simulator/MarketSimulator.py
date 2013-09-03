@@ -6,8 +6,8 @@ Created on Sep 3, 2013
 
 class MarketSimulator(object):
     
-    _training_file = ""
-    _testing_file = ""
+    _training_file = None
+    _testing_file = None
     
     '''
     This trading simulator tests a trading strategy against historical data in order to evaluate 
@@ -21,7 +21,7 @@ class MarketSimulator(object):
     '''
 
 
-    def __init__(self, training_file_csv, test_file_csv = ""):
+    def __init__(self, training_file_csv, test_file_csv = None):
         '''
         Constructor - takes two file locations pointing to the training and testing data. 
         Should be in the following csv format: 
@@ -33,21 +33,33 @@ class MarketSimulator(object):
         '''
         self.set_trainingfile(training_file_csv)
         
-        if test_file_csv:
+        if test_file_csv is not None:
             self.set_testfile(test_file_csv)
     
-    def set_trainingfile(self, training_file_csv):
+    def set_training_file(self, training_file_csv):
         '''
         Set the training file. Should be in the following csv format: 
         Date (in MM/DD/YYYY format), Time (in HHMM format), Price, and Volume.
         '''
         self._training_file = training_file_csv
         
-    def set_testfile(self, test_file_csv):
+    def set_test_file(self, test_file_csv):
         '''
         Set the test file. Should be in the following csv format: 
         Date (in MM/DD/YYYY format), Time (in HHMM format), Price, and Volume.
         '''
         self._testing_file = test_file_csv
         
-    
+    def load_training_data(self, training_file_csv=None):
+        '''
+        Load in the training data from the training file.
+        
+        Optional arguments:
+        training_file_csv --
+        '''
+        if training_file_csv is not None:
+            self.set_training_file(training_file_csv)
+        
+        if self._training_file is None:    
+            raise IOError('No training file specified. Please set a training file.')
+            return
