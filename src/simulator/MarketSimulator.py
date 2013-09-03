@@ -87,7 +87,7 @@ class Entry(object):
     '''
     A wrapper class that holds information about a minute of trading.
     '''
-    _time = None
+    _time = None # This is a 'datetime' object, and contains the date + time
     _price = None
     _volume = None
     
