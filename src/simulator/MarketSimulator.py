@@ -3,11 +3,14 @@ Created on Sep 3, 2013
 
 @author: feaver
 '''
+import datetime
 
 class MarketSimulator(object):
     
     _training_file = None
     _testing_file = None
+    # The trading entries
+    _entries = []
     
     '''
     This trading simulator tests a trading strategy against historical data in order to evaluate 
@@ -29,12 +32,12 @@ class MarketSimulator(object):
         
         Keyword arguments:
         training_file_csv -- the location of the csv file containing training data.
-        test_file_csv -- the location of the csv file to test with (default none)
+        test_file_csv -- the location of the csv file to test with (default 'None')
         '''
-        self.set_trainingfile(training_file_csv)
+        self.set_training_file(training_file_csv)
         
         if test_file_csv is not None:
-            self.set_testfile(test_file_csv)
+            self.set_test_file(test_file_csv)
     
     def set_training_file(self, training_file_csv):
         '''
@@ -54,12 +57,53 @@ class MarketSimulator(object):
         '''
         Load in the training data from the training file.
         
-        Optional arguments:
-        training_file_csv --
+        Keyword arguments (optional):
+        training_file_csv -- the location of the csv file containing training data.
         '''
+        # Check if an arg is passed
         if training_file_csv is not None:
             self.set_training_file(training_file_csv)
         
-        if self._training_file is None:    
+        if self._training_file is None:
             raise IOError('No training file specified. Please set a training file.')
             return
+        
+        # Load the file
+        f = open(self._training_file, 'r')
+        
+        # Skip the first line
+        line = f.readline()
+        
+        for line in f.xreadlines():
+            parts = line.strip().split(',')
+            time = datetime.datetime.strptime(parts[0] + parts[1], "%m/%d/%Y%H%M")
+            price = float(parts[2])
+            volume = int(parts[3])
+            self._entries.append(Entry(time, price, volume))
+        
+        f.close()
+        
+class Entry(object):
+    '''
+    A wrapper class that holds information about a minute of trading.
+    '''
+    _time = None
+    _price = None
+    _volume = None
+    
+    def __init__(self, time, price, volume):
+        self._time = time
+        self._price = price
+        self._volume = volume
+        
+    def __str__(self):
+        out = "(" + self._time.strftime("%m/%d/%Y, %H%M") + ", " + str(self._price) + ", " + str(self._volume) + ")"
+        return out
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    
+if __name__ == '__main__':
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv")
+    sim.load_training_data()
