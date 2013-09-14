@@ -44,6 +44,8 @@ class MarketSimulator(object):
     _strategy = None
     # The trading entries
     _entries = []
+    # The number of entries in the training data
+    _num_entries_training = 0
 
     def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, round_trade_cost = DEFAULT_ROUND_TRADE_COST, strategy = DEFAULT_STRATEGY):
         '''
@@ -106,6 +108,8 @@ class MarketSimulator(object):
             raise IOError('No training file specified. Please set a training file.')
             return
         
+        self._entries = []
+        
         # Load the file
         f = open(self._training_file, 'r')
         
@@ -119,10 +123,43 @@ class MarketSimulator(object):
             volume = int(parts[3])
             self._entries.append(Entry(time, price, volume))
         
+        self._num_entries_training = len(self._entries)
         f.close()
         
-    def run(self):
-        self._strategy.set_market(self)
+    def load_testing_data(self, testing_file_csv=None):
+        # Check if an argument is passed
+        if testing_file_csv is not None:
+            self.set_training_file(testing_file_csv)
+        
+        if self._training_file is None:
+            raise IOError('No testing file specified. Please set a testing file.')
+            return
+        
+        self._entries = []
+        
+        # Load the file
+        f = open(self._testing_file, 'r')
+        
+        # Skip the first line
+        line = f.readline()
+        
+        for line in f.xreadlines():
+            parts = line.strip().split(',')
+            time = datetime.datetime.strptime(parts[0] + parts[1], "%m/%d/%Y%H%M")
+            price = float(parts[2])
+            volume = int(parts[3])
+            self._entries.append(Entry(time, price, volume))
+        
+        f.close()
+        
+    def train(self):
+        '''
+        Train the market strategy, using the training data
+        '''
+        # Reset the investment
+        self._current_investment = self._original_investment
+        
+        self._strategy.set_market(self) #Only set up the strategy during training
         
         # For each entry in the market
         for x in xrange(len(self._entries)):
@@ -142,7 +179,33 @@ class MarketSimulator(object):
                 if x != 0: # Don't close the first trade
                     self.close(x, self._strategy.get_previous_open_index())
                 self.open(x, position)
+    
+    def test(self):
+        '''
+        Test the market strategy, using the testing data
+        '''
+        # Reset the investment
+        self._current_investment = self._original_investment
+        
+        # For each entry in the market
+        for x in xrange(self._num_entries_training):
+            # if it's the final entry, force the close
+            if x == self._num_entries_training - 1:
+                self.close(x, self._strategy.get_previous_open_index())
+                continue
             
+            # Get the position calculated during training
+            position = self._strategy.get_position(x)
+            
+            # If we're currently holding or out, don't do anything
+            if position == Position.HOLD or position == Position.OUT:
+                continue
+            # Otherwise, close the previous trade, then open a trade
+            else:
+                if x != 0: # Don't close the first trade
+                    self.close(x, self._strategy.get_previous_open_index())
+                self.open(x, position)
+        
     def open(self, index, position):
         '''
         Open a trade at the specified index i.e. time
@@ -220,5 +283,9 @@ class Entry(object):
 if __name__ == '__main__':
     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
     sim.load_training_data()
-    sim.run()
+    sim.train()
+    print sim._current_investment
+    
+    sim.load_testing_data()
+    sim.test()
     print sim._current_investment
