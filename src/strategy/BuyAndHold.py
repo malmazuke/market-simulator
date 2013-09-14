@@ -13,7 +13,7 @@ class BuyAndHold(object):
     _curr_position = None
     _market = None
     _is_holding = False
-    _entry_holding = None
+    _entry_index = None
 
     def __init__(self, market):
         '''
@@ -25,17 +25,18 @@ class BuyAndHold(object):
         
         self._curr_position = Position.LONG
         self._market = market
-        self._entry_holding = self._market.get_entry(0)
+        self._entry_index = 0
         self._is_holding = True
 
     def trade(self, entry):
         '''
-        Make a decision for a specific entry on whether to go long, short, hold, or be out of the market
+        Make a decision for a specific entry on whether to go long, short, hold, or be out of the market, and
+        return the amount lost or gained
         
         Keyword arguments:
         entry -- a single entry (i.e. minute), containing the time (datetime), price, and volume
         '''
-        return
+        return 0
 
 class Position:
     '''
