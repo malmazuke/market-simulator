@@ -4,7 +4,7 @@ Created on Sep 3, 2013
 @author: Mark Feaver
 '''
 import datetime
-from strategy.BuyAndHold import BuyAndHold
+from strategy.BuyAndHold import BuyAndHold, Position
 
 # In dollar values
 DEFAULT_STARTING_INVESTMENT = 100000.0
@@ -35,6 +35,8 @@ class MarketSimulator(object):
     # The dollar value of the investments
     _original_investment = None
     _current_investment = None
+    # How much each trade costs
+    _round_trade_cost = None
     # CSV files
     _training_file = None
     _testing_file = None
@@ -42,6 +44,11 @@ class MarketSimulator(object):
     _strategy = None
     # The trading entries
     _entries = []
+#     # The current index of the entry purchase
+#     _open_index = None
+#     # The currently held trading position i.e. SHORT, LONG, etc
+#     _open_position = Position.OUT
+    
 
     def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, round_trade_cost = DEFAULT_ROUND_TRADE_COST, strategy = DEFAULT_STRATEGY):
         '''
@@ -56,6 +63,7 @@ class MarketSimulator(object):
         self.set_training_file(training_file_csv)
         self._original_investment = starting_investment
         self._current_investment = starting_investment
+        self._round_trade_cost = round_trade_cost
         self._strategy = strategy
         
         if test_file_csv is not None:
@@ -80,6 +88,12 @@ class MarketSimulator(object):
         Return the entry at the given index 
         '''
         return self._entries[index]
+    
+    def number_of_entries(self):
+        '''
+        Return the number of entries
+        '''
+        return len(self._entries)
         
     def load_training_data(self, training_file_csv=None):
         '''
@@ -112,6 +126,118 @@ class MarketSimulator(object):
         
         f.close()
         
+    def run(self):
+        self._strategy.set_market(self)
+        
+        # For each entry in the market
+        for x in xrange(len(self._entries)):
+            # if it's the final entry, force the close
+            if x == len(self._entries) - 1:
+                self.close(x, self._strategy.get_previous_open_index())
+                continue
+            
+            # Calculate the position to take for the given index
+            position = self._strategy.trade(x)
+            
+            # If we're currently holding or out, don't do anything
+            if position == Position.HOLD or position == Position.OUT:
+                continue
+            # Otherwise, close the previous trade, then open a trade
+            else:
+                if x != 0: # Don't close the first trade
+                    self.close(x, self._strategy.get_previous_open_index())
+                self.open(x, position)
+            
+            
+#         # For each entry in the market (except the last one)
+#         for x in xrange(len(self._entries) - 1):
+#             orig_position = self._strategy.get_position()
+#             pos = self._strategy.trade(x) # Make a trading decision
+#             
+#             if pos == Position.HOLD or pos == Position.OUT:
+#                 continue
+#              
+#             if pos == Position.LONG or pos == Position.SHORT:
+#                 if self._open_index is None:
+#                     self._open_index = x
+#                 else:
+#                     close_price = self.get_entry(x).get_price()
+#                     open_price = self.get_entry(self._open_index).get_price()
+#                     price_change = self.calc_price_change(close_price, open_price)
+#                     amount = price_change * self._current_investment
+#                     
+#                     if orig_position == Position.LONG:
+#                         self._current_investment += amount
+#                     else:
+#                         self._current_investment -= amount
+#                     
+#                     self._current_investment -= self._round_trade_cost
+#                         
+#                 self._open_position = pos
+#                 self._open_index = x
+#         
+#         # Calculate our final closing balance, based on the last entry        
+#         x = len(self._entries) - 1
+#         pos = self._strategy.get_position()
+#         # Calculate how much we gain/lose
+#         close_price = self.get_entry(x).get_price()
+#         open_price = self.get_entry(self._open_index).get_price()
+#         price_change = self.calc_price_change(close_price, open_price)
+#         amount = price_change * self._current_investment
+#         
+#         if orig_position == Position.LONG:
+#             self._current_investment += amount
+#         else:
+#             self._current_investment -= amount
+#         
+#         self._current_investment -= self._round_trade_cost
+        
+    def open(self, index, position):
+        '''
+        Open a trade at the specified index i.e. time
+        
+        index -- the index of the trade to open (from self._entries)
+        position -- the type of trade (either LONG or SHORT)
+        '''
+        self._strategy.open_trade(index, position)
+        
+    def close(self, close_index, open_index):
+        '''
+        Close a trade at the specified index i.e. time
+        
+        Keyword arguments:
+        close_index -- the index of the trade to close (from self._entries)
+        open_index -- the index where the trade was originally opened
+        '''
+        
+        close_price = self._entries[close_index].get_price()
+        open_price = self._entries[open_index].get_price()
+        price_change = self.calc_price_change(close_price, open_price)
+        amount = price_change * self._current_investment # The amount gained/lost
+        
+        previous_position = self._strategy.get_position(open_index)
+        
+        # If going long, we need a positive stock price increase in order to make money.
+        # The opposite is true for going short
+        if previous_position == Position.LONG:
+            self._current_investment += amount
+        elif previous_position == Position.SHORT:
+            self._current_investment -= amount
+            
+        # Subtract the trading costs too
+        self._current_investment -= self._round_trade_cost
+        
+    def calc_price_change(self, close_price, open_price):
+        '''
+        Calculates the price change between two stock prices
+        
+        Keyword arguments:
+        close_price -- the price of the stock when trade was exited
+        open_price -- the price of the stock when trade was entered 
+        '''
+        return (close_price/open_price - 1) 
+                
+        
 class Entry(object):
     '''
     A wrapper class that holds information about a minute of trading.
@@ -137,6 +263,11 @@ class Entry(object):
     def __repr__(self):
         return self.__str__()
     
+    def get_price(self):
+        return self._price
+    
 if __name__ == '__main__':
     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv")
     sim.load_training_data()
+    sim.run()
+    print sim._current_investment
