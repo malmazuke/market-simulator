@@ -4,11 +4,22 @@ Created on Sep 3, 2013
 @author: feaver
 '''
 import datetime
+from strategy.BuyAndHold import BuyAndHold
+
+# In dollar values
+DEFAULT_STARTING_INVESTMENT = 100000.0
+ROUND_TRADE_COST = 10.0
 
 class MarketSimulator(object):
     
+    # The dollar value of the investments
+    _original_investment = None
+    _current_investment = None
+    # CSV files
     _training_file = None
     _testing_file = None
+    # The type of trading strategy: 
+    _strategy = None
     # The trading entries
     _entries = []
     
@@ -24,7 +35,7 @@ class MarketSimulator(object):
     '''
 
 
-    def __init__(self, training_file_csv, test_file_csv = None):
+    def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, strategy = BuyAndHold()):
         '''
         Constructor - takes two file locations pointing to the training and testing data. 
         Should be in the following csv format: 
@@ -35,6 +46,9 @@ class MarketSimulator(object):
         test_file_csv -- the location of the csv file to test with (default 'None')
         '''
         self.set_training_file(training_file_csv)
+        self._original_investment = starting_investment
+        self._current_investment = starting_investment
+        self._strategy = strategy
         
         if test_file_csv is not None:
             self.set_test_file(test_file_csv)
