@@ -4,7 +4,8 @@ Created on Sep 3, 2013
 @author: Mark Feaver
 '''
 import datetime
-from strategy.BuyAndHold import BuyAndHold, Position
+from entities.position import Position
+from strategy.buy_and_hold import BuyAndHold
 
 # In dollar values
 DEFAULT_STARTING_INVESTMENT = 100000.0
