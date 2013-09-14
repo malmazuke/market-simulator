@@ -11,9 +11,9 @@ class BuyAndHold(object):
     val = None
 
 
-    def __init__(self, val):
+    def __init__(self):
         '''
         Constructor
         '''
-        self.val = val
+
         

@@ -6,6 +6,11 @@ Created on Sep 3, 2013
 import datetime
 from strategy.BuyAndHold import BuyAndHold
 
+# In dollar values
+DEFAULT_STARTING_INVESTMENT = 100000.0
+DEFAULT_ROUND_TRADE_COST = 10.0
+DEFAULT_STRATEGY = BuyAndHold()
+    
 class MarketSimulator(object):
     '''
     This trading simulator tests a trading strategy against historical data in order to evaluate 
@@ -16,11 +21,16 @@ class MarketSimulator(object):
     (ii) has functionality for simulating the entry and exit of trades at appropriate points, and 
     (iii) produces summary statistics showing how well the strategy performed overall on the historical data.
     Any open trades are automatically closed at the end of the simulation period.
-    '''
     
-    # In dollar values
-    DEFAULT_STARTING_INVESTMENT = 100000.0
-    ROUND_TRADE_COST = 10.0
+    The following assumptions have been made:
+    - the starting investment at the beginning of a six month period is always
+        $100,000
+    - each round trip trade costs $10
+    - your strategy can only make a single trade at a time, and can therefore only
+        chose a single direction (long or short) at a time
+    - 100% of capital is invested into the market for each trade
+    - trades can be held overnight or for as long as needed without extra charges
+    '''
     
     # The dollar value of the investments
     _original_investment = None
@@ -33,7 +43,7 @@ class MarketSimulator(object):
     # The trading entries
     _entries = []
 
-    def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, strategy = BuyAndHold()):
+    def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, round_trade_cost = DEFAULT_ROUND_TRADE_COST, strategy = DEFAULT_STRATEGY):
         '''
         Constructor - takes two file locations pointing to the training and testing data. 
         Should be in the following csv format: 
