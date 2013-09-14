@@ -1,7 +1,7 @@
 '''
 Created on Sep 3, 2013
 
-@author: feaver
+@author: Mark Feaver
 '''
 import datetime
 from strategy.BuyAndHold import BuyAndHold
@@ -74,6 +74,12 @@ class MarketSimulator(object):
         Date (in MM/DD/YYYY format), Time (in HHMM format), Price, and Volume.
         '''
         self._testing_file = test_file_csv
+        
+    def get_entry(self, index):
+        '''
+        Return the entry at the given index 
+        '''
+        return self._entries[index]
         
     def load_training_data(self, training_file_csv=None):
         '''
