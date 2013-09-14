@@ -6,11 +6,21 @@ Created on Sep 3, 2013
 import datetime
 from strategy.BuyAndHold import BuyAndHold
 
-# In dollar values
-DEFAULT_STARTING_INVESTMENT = 100000.0
-ROUND_TRADE_COST = 10.0
-
 class MarketSimulator(object):
+    '''
+    This trading simulator tests a trading strategy against historical data in order to evaluate 
+    how well the strategy would have performed in the past.
+    
+    This simulator:
+    (i) simulates the price and volume of the market for each passing minute, 
+    (ii) has functionality for simulating the entry and exit of trades at appropriate points, and 
+    (iii) produces summary statistics showing how well the strategy performed overall on the historical data.
+    Any open trades are automatically closed at the end of the simulation period.
+    '''
+    
+    # In dollar values
+    DEFAULT_STARTING_INVESTMENT = 100000.0
+    ROUND_TRADE_COST = 10.0
     
     # The dollar value of the investments
     _original_investment = None
@@ -22,18 +32,6 @@ class MarketSimulator(object):
     _strategy = None
     # The trading entries
     _entries = []
-    
-    '''
-    This trading simulator tests a trading strategy against historical data in order to evaluate 
-    how well the strategy would have performed in the past.
-    
-    This simulator:
-    (i) simulates the price and volume of the market for each passing minute, 
-    (ii) has functionality for simulating the entry and exit of trades at appropriate points, and 
-    (iii) produces summary statistics showing how well the strategy performed overall on the historical data.
-    Any open trades are automatically closed at the end of the simulation period.
-    '''
-
 
     def __init__(self, training_file_csv, test_file_csv = None, starting_investment = DEFAULT_STARTING_INVESTMENT, strategy = BuyAndHold()):
         '''
@@ -74,7 +72,8 @@ class MarketSimulator(object):
         Keyword arguments (optional):
         training_file_csv -- the location of the csv file containing training data.
         '''
-        # Check if an arg is passed
+        
+        # Check if an argument is passed
         if training_file_csv is not None:
             self.set_training_file(training_file_csv)
         
@@ -101,11 +100,16 @@ class Entry(object):
     '''
     A wrapper class that holds information about a minute of trading.
     '''
+    
     _time = None # This is a 'datetime' object, and contains the date + time
     _price = None
     _volume = None
     
     def __init__(self, time, price, volume):
+        '''
+        Constructor that takes a time (as a datetime object), price of the entry, and the volume of shares traded
+        '''
+        
         self._time = time
         self._price = price
         self._volume = volume
@@ -116,7 +120,6 @@ class Entry(object):
     
     def __repr__(self):
         return self.__str__()
-    
     
 if __name__ == '__main__':
     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv")
