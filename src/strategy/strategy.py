@@ -66,11 +66,12 @@ class Strategy(object):
         self._previous_open_index = index
         self._number_of_trades += 1
         
-    def reset_num_trades(self):
+    def reinit_for_testing(self):
         '''
         Reset the number of trades back to 0
         '''
         self._number_of_trades = 0
+        self._previous_open_index = 0
         
     def number_of_trades(self):
         '''

@@ -167,7 +167,7 @@ class MarketSimulator(object):
         # Reset the investment
         self._current_investment = self._original_investment
         self._strategy.set_market(self) #Only set up the strategy during training
-        self._strategy.reset_num_trades()
+        self._strategy.reinit_for_testing()
         
         # For each entry in the market
         for x in xrange(len(self._entries)):
@@ -197,7 +197,7 @@ class MarketSimulator(object):
         '''
         # Reset the investment
         self._current_investment = self._original_investment
-        self._strategy.reset_num_trades()
+        self._strategy.reinit_for_testing()
         
         # For each entry in the market
         for x in xrange(self.number_of_entries()):
@@ -238,6 +238,8 @@ class MarketSimulator(object):
         close_index -- the index of the trade to close (from self._entries)
         open_index -- the index where the trade was originally opened
         '''
+        if open_index > self.number_of_entries():
+            print "hello"
         
         close_price = self._entries[close_index].get_price()
         open_price = self._entries[open_index].get_price()
@@ -298,8 +300,8 @@ class Entry(object):
     
 if __name__ == '__main__':
 #     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
-    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(100))
-#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(100))
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(500))
+#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(500))
 
     sim.load_training_data()
     sim.train()
