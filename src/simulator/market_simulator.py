@@ -160,8 +160,8 @@ class MarketSimulator(object):
         '''
         # Reset the investment
         self._current_investment = self._original_investment
-        
         self._strategy.set_market(self) #Only set up the strategy during training
+        self._strategy.reset_num_trades()
         
         # For each entry in the market
         for x in xrange(len(self._entries)):
@@ -179,7 +179,10 @@ class MarketSimulator(object):
             # Otherwise, close the previous trade, then open a trade
             else:
                 if x != 0: # Don't close the first trade
-                    self.close(x, self._strategy.get_previous_open_index())
+                    prev_index = self._strategy.get_previous_open_index()
+                    prev_pos = self._strategy.get_position(prev_index)
+                    if prev_pos != Position.OUT: # If we're not sitting out, open
+                        self.close(x, prev_index)
                 self.open(x, position)
     
     def test(self):
@@ -188,6 +191,7 @@ class MarketSimulator(object):
         '''
         # Reset the investment
         self._current_investment = self._original_investment
+        self._strategy.reset_num_trades()
         
         # For each entry in the market
         for x in xrange(self._num_entries_training):
@@ -237,11 +241,12 @@ class MarketSimulator(object):
         # The opposite is true for going short
         if previous_position == Position.LONG:
             self._current_investment += amount
+            # Subtract the trading costs too
+            self._current_investment -= self._round_trade_cost
         elif previous_position == Position.SHORT:
             self._current_investment -= amount
-            
-        # Subtract the trading costs too
-        self._current_investment -= self._round_trade_cost
+            # Subtract the trading costs too
+            self._current_investment -= self._round_trade_cost
         
     def calc_price_change(self, close_price, open_price):
         '''
@@ -284,10 +289,13 @@ class Entry(object):
     
 if __name__ == '__main__':
     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(5))
+#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
     sim.load_training_data()
     sim.train()
     print sim._current_investment
+    print sim._strategy.number_of_trades()
     
     sim.load_testing_data()
     sim.test()
     print sim._current_investment
+    print sim._strategy.number_of_trades()

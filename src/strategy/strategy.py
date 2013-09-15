@@ -13,6 +13,7 @@ class Strategy(object):
     _positions = []
     _market = None
     _previous_open_index = None
+    _number_of_trades = 0
 
     def __init__(self):
         '''
@@ -62,3 +63,10 @@ class Strategy(object):
         '''
         self._positions[index] = position
         self._previous_open_index = index
+        self._number_of_trades += 1
+        
+    def reset_num_trades(self):
+        self._number_of_trades = 0
+        
+    def number_of_trades(self):
+        return self._number_of_trades

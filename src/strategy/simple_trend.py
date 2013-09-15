@@ -51,13 +51,11 @@ class SimpleTrend(Strategy):
             pos = Position.HOLD # If we don't need to change, we hold
             
             # If the moving average indicator turns down, we go short
-            if curr_m_a < prev_m_a and self._positions[index-1] != Position.SHORT:
+            if curr_m_a < prev_m_a and self._positions[self._previous_open_index] != Position.SHORT:
                 pos = Position.SHORT
-                self._previous_open_index = index
             # Else, if the moving average indicator turns up, we go long
-            elif curr_m_a > prev_m_a and self._positions[index-1] != Position.LONG:
+            elif curr_m_a > prev_m_a and self._positions[self._previous_open_index] != Position.LONG:
                 pos = Position.LONG
-                self._previous_open_index = index
             
             # Store the position
             self._positions[index] = pos
@@ -71,7 +69,7 @@ class SimpleTrend(Strategy):
         
         total = 0
         count = 0
-        for x in xrange(index - n + 1, index+1):
+        for x in xrange(index - n + 1, index + 1): # +1, so that it includes the current index
             if x < 0: # Don't calculate values where they don't exist
                 continue
             
