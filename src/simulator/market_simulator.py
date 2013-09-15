@@ -6,6 +6,7 @@ Created on Sep 3, 2013
 import datetime
 from entities.position import Position
 from strategy.buy_and_hold import BuyAndHold
+from strategy.simple_trend import SimpleTrend
 
 # In dollar values
 DEFAULT_STARTING_INVESTMENT = 100000.0
@@ -91,7 +92,7 @@ class MarketSimulator(object):
         '''
         Return the number of entries
         '''
-        return len(self._entries)
+        return self._num_entries_training
         
     def load_training_data(self, training_file_csv=None):
         '''
@@ -282,7 +283,7 @@ class Entry(object):
         return self._price
     
 if __name__ == '__main__':
-    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(5))
     sim.load_training_data()
     sim.train()
     print sim._current_investment
