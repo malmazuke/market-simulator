@@ -10,10 +10,11 @@ class Strategy(object):
     A parent class that describes behaviour for a strategy
     '''
 
+    # The positions taken for the entire data - contains Position values (i.e. OUT, LONG, SHORT, HOLD)
     _positions = []
-    _market = None
-    _previous_open_index = None
-    _number_of_trades = 0
+    _market = None # The MarketSimulator object
+    _previous_open_index = None # The opening index of the current position
+    _number_of_trades = 0 # The total number of trades
 
     def __init__(self):
         '''
@@ -66,7 +67,13 @@ class Strategy(object):
         self._number_of_trades += 1
         
     def reset_num_trades(self):
+        '''
+        Reset the number of trades back to 0
+        '''
         self._number_of_trades = 0
         
     def number_of_trades(self):
+        '''
+        Return the number of trades
+        '''
         return self._number_of_trades
