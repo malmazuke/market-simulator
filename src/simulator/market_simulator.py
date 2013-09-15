@@ -137,7 +137,7 @@ class MarketSimulator(object):
     def load_testing_data(self, testing_file_csv=None):
         # Check if an argument is passed
         if testing_file_csv is not None:
-            self.set_training_file(testing_file_csv)
+            self.set_test_file(testing_file_csv)
         
         if self._training_file is None:
             raise IOError('No testing file specified. Please set a testing file.')
@@ -300,8 +300,8 @@ class Entry(object):
     
 if __name__ == '__main__':
 #     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
-    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(500))
-#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(500))
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(1))
+#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(5))
 
     sim.load_training_data()
     sim.train()
@@ -309,6 +309,11 @@ if __name__ == '__main__':
     print sim._strategy.number_of_trades()
     
     sim.load_testing_data()
+    sim.test()
+    print sim._current_investment
+    print sim._strategy.number_of_trades()
+    
+    sim.load_testing_data("../../data/testing/SPY.2011.jan_mar.csv")
     sim.test()
     print sim._current_investment
     print sim._strategy.number_of_trades()
