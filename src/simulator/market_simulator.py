@@ -90,9 +90,15 @@ class MarketSimulator(object):
     
     def number_of_entries(self):
         '''
-        Return the number of entries
+        Return the number of entries (the smallest count from either training or test set)
         '''
-        return self._num_entries_training
+        num = 0
+        if self._num_entries_training < len(self._entries):
+            num = self._num_entries_training
+        else:
+            num = len(self._entries)
+        
+        return num
         
     def load_training_data(self, training_file_csv=None):
         '''
@@ -194,9 +200,9 @@ class MarketSimulator(object):
         self._strategy.reset_num_trades()
         
         # For each entry in the market
-        for x in xrange(self._num_entries_training):
+        for x in xrange(self.number_of_entries()):
             # if it's the final entry, force the close
-            if x == self._num_entries_training - 1:
+            if x == self.number_of_entries() - 1:
                 self.close(x, self._strategy.get_previous_open_index())
                 continue
             
@@ -209,7 +215,10 @@ class MarketSimulator(object):
             # Otherwise, close the previous trade, then open a trade
             else:
                 if x != 0: # Don't close the first trade
-                    self.close(x, self._strategy.get_previous_open_index())
+                    prev_index = self._strategy.get_previous_open_index()
+                    prev_pos = self._strategy.get_position(prev_index)
+                    if prev_pos != Position.OUT: # If we're not sitting out, open
+                        self.close(x, prev_index)
                 self.open(x, position)
         
     def open(self, index, position):
@@ -288,8 +297,10 @@ class Entry(object):
         return self._price
     
 if __name__ == '__main__':
-    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(1000))
 #     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(100))
+#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(100))
+
     sim.load_training_data()
     sim.train()
     print sim._current_investment
