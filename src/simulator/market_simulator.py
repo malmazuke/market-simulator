@@ -318,7 +318,7 @@ if __name__ == '__main__':
     print sim._strategy.number_of_trades()
     
     # Then use SimpleTrend on the sets
-    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(1))
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(8000))
 
     sim.load_training_data()
     sim.train()
