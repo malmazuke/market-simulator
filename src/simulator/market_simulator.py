@@ -299,9 +299,26 @@ class Entry(object):
         return self._price
     
 if __name__ == '__main__':
-#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
+    # Use the Buy & Hold method first, using the training set, and testing on both testing sets
+    sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv")
+
+    sim.load_training_data()
+    sim.train()
+    print sim._current_investment
+    print sim._strategy.number_of_trades()
+    
+    sim.load_testing_data()
+    sim.test()
+    print sim._current_investment
+    print sim._strategy.number_of_trades()
+    
+    sim.load_testing_data("../../data/testing/SPY.2011.jan_mar.csv")
+    sim.test()
+    print sim._current_investment
+    print sim._strategy.number_of_trades()
+    
+    # Then use SimpleTrend on the sets
     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2010.jul_dec.csv", strategy=SimpleTrend(1))
-#     sim = MarketSimulator("../../data/training/SPY.2010.jan_jun.csv", "../../data/testing/SPY.2011.jan_mar.csv", strategy=SimpleTrend(5))
 
     sim.load_training_data()
     sim.train()
