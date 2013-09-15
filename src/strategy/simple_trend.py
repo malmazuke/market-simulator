@@ -6,7 +6,7 @@ Created on Sep 14, 2013
 from strategy import Strategy
 from entities.position import Position
 
-DEFAULT_N = 1
+DEFAULT_N = 5
 class SimpleTrend(Strategy):
     '''
     SimpleTrend is a very slightly more complex strategy. The idea is that if MA(n) indicator turns down 
@@ -26,8 +26,6 @@ class SimpleTrend(Strategy):
         Strategy.__init__(self)
         self._n = n  
     
-    
-        
     def trade(self, index):
         '''
         Make a decision for a specific entry on whether to go long, short, hold, or be out of the market
@@ -73,11 +71,12 @@ class SimpleTrend(Strategy):
             if x < 0: # Don't calculate values where they don't exist
                 continue
             
+            # Get the relevant entry's price, and add it to the running total
             total += self._market.get_entry(x).get_price()
             count += 1
         
         if count == 0:
             return 0
         
-        return total/float(count)
+        return total/float(count) # Return the average
         
